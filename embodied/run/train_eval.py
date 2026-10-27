@@ -111,7 +111,7 @@ def train_eval(
       agg.add(mets)
     return carry, agg.result()
 
-  cp = elements.Checkpoint(logdir / 'ckpt')
+  cp = elements.Checkpoint(logdir / 'ckpt', keep=args.keep_ckpts)
   cp.step = step
   cp.agent = agent
   cp.replay_train = replay_train

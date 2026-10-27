@@ -80,7 +80,7 @@ def train(make_agent, make_replay, make_env, make_stream, make_logger, args):
       train_agg.add(mets, prefix='train')
   driver.on_step(trainfn)
 
-  cp = elements.Checkpoint(logdir / 'ckpt')
+  cp = elements.Checkpoint(logdir / 'ckpt', keep=args.keep_ckpts)
   cp.step = step
   cp.agent = agent
   cp.replay = replay

@@ -52,6 +52,7 @@ defaults:
     log_every: 120
     report_every: 300
     save_every: 900
+    keep_ckpts: 1
     envs: 16
     eval_envs: 4
     eval_eps: 1

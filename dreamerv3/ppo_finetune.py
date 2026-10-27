@@ -209,7 +209,9 @@ def gae(rew, last, term, val, gamma, lam):
   return adv, adv + val[:, :T]
 
 
-def main(argv=None):
+def parse_config(argv=None, base=None):
+  """Build the PPO config from flags. `base` (a mapping, e.g. the config.yaml
+  saved by the Dreamer run) replaces the --configs blocks when given."""
   configs = elements.Path(folder / 'configs.yaml').read()
   configs = yaml.YAML(typ='safe').load(configs)
   parsed, other = elements.Flags(
@@ -218,9 +220,12 @@ def main(argv=None):
           iters=1000, epochs=4, clip=0.2, ent=3e-4, gamma=0.0, lam=0.95,
           save_every=50),
   ).parse_known(argv)
-  config = elements.Config(configs['defaults'])
-  for name in parsed.configs:
-    config = config.update(configs[name])
+  if base is not None:
+    config = elements.Config(base)
+  else:
+    config = elements.Config(configs['defaults'])
+    for name in parsed.configs:
+      config = config.update(configs[name])
   config = config.update(
       replay_context=0,
       logger=dict(filter='score|length|fps|ppo/|train/opt/loss'))
@@ -229,7 +234,14 @@ def main(argv=None):
   config = config.update(logdir=(
       config.logdir.format(timestamp=elements.timestamp())))
   assert config.ckpt, 'Pass the trained Dreamer checkpoint with --ckpt'
+  return config
 
+
+def main(argv=None):
+  run(parse_config(argv))
+
+
+def run(config):
   args = config.run
   B, T = config.batch_size, config.batch_length
   assert args.envs % B == 0, (
