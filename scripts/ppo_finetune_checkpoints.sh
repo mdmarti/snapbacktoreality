@@ -70,7 +70,7 @@ keep_ckpts="${KEEP_CKPTS:-10}"
 ppo_envs="${PPO_ENVS:-16}"
 ppo_flags="${PPO_FLAGS:-}"
 
-OVERLAY="/scratch/mdm9734/overlay_copies_gpu/dreamer-overlay-gpu-${SLURM_ARRAY_JOB_ID}.ext3"
+OVERLAY="/scratch/mdm9734/overlay_copies_gpu/scene-torch-overlay-gpu-${SLURM_ARRAY_JOB_ID}.ext3"
 IMAGE="/share/apps/images/cuda12.1.1-cudnn8.9.0-devel-ubuntu22.04.2.sif"
 
 # Run a command inside the container with the project's python environment.
