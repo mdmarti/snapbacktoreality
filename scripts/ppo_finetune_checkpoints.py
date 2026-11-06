@@ -32,6 +32,7 @@ have a `done` marker in <out> are skipped, so an interrupted sweep can resume.
 import argparse
 import gc
 import pathlib
+import pickle
 import sys
 
 root = pathlib.Path(__file__).resolve().parent.parent
@@ -43,6 +44,20 @@ import ruamel.yaml as yaml
 from dreamerv3 import ppo_finetune
 
 
+def checkpoint_step(path):
+  """Env step of a checkpoint.
+
+  Dreamer saves the step counter inside the checkpoint (`step.pkl`) and names
+  the folder only by timestamp; a `-<step>` suffix is used if present.
+  """
+  if '-' in path.name:
+    try:
+      return int(path.name.rsplit('-', 1)[1])
+    except ValueError:
+      pass
+  return int(pickle.loads((path / 'step.pkl').read_bytes()))
+
+
 def list_checkpoints(directory):
   """Completed checkpoints as (step, path), sorted by step."""
   directory = elements.Path(directory)
@@ -52,8 +67,8 @@ def list_checkpoints(directory):
   for path in directory.glob('*'):
     if path.name == 'latest' or not (path / 'done').exists():
       continue
-    found.append((int(path.name.rsplit('-', 1)[1]), path))
-  found.sort(key=lambda x: x[0])
+    found.append((checkpoint_step(path), path))
+  found.sort(key=lambda x: (x[0], x[1].name))
   if not found:
     raise FileNotFoundError(f'No completed checkpoints in {directory}')
   return found

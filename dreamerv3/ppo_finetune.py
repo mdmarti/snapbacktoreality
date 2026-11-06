@@ -316,6 +316,18 @@ def run(config):
   driver.reset(agent.init_policy)
 
   print('Start PPO loop')
+  try:
+    _loop(config, agent, driver, policy, bufs, carry, train_agg, rng, logger,
+          cp, make_batch, gamma)
+  finally:
+    driver.close()
+    logger.close()
+
+
+def _loop(config, agent, driver, policy, bufs, carry, train_agg, rng, logger,
+          cp, make_batch, gamma):
+  args = config.run
+  B, T = config.batch_size, config.batch_length
   for it in range(config.ppo.iters):
     rounds = T + 1 - len(bufs[0])
     driver(policy, steps=rounds * args.envs)
@@ -361,7 +373,6 @@ def run(config):
       cp.save()
 
   cp.save()
-  logger.close()
 
 
 def f32np(x):
